@@ -24,7 +24,9 @@ function initLoginForm() {
       // El redireccionamiento lo maneja onAuthStateChanged más abajo
     } catch (err) {
       console.error(err);
-      errorEl.textContent = "Usuario o contraseña incorrectos";
+      // NOTA TEMPORAL DE DIAGNÓSTICO: esto muestra el error real de Firebase
+      // para poder identificar la causa exacta. Luego lo volvemos al mensaje normal.
+      errorEl.textContent = "Error real: " + err.code + " — " + err.message;
       btn.disabled = false;
       btn.textContent = "Iniciar sesión";
     }
