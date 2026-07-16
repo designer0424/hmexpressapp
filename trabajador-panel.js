@@ -1,5 +1,6 @@
 let perfilActual = null;
 let unsubscribeServicios = null;
+let serviciosPorId = {};
 
 document.addEventListener("DOMContentLoaded", () => {
   protegerPagina("trabajador", (perfil) => {
@@ -30,6 +31,9 @@ function escucharServiciosDeHoy() {
 }
 
 function pintarServicios(servicios) {
+  serviciosPorId = {};
+  servicios.forEach((s) => (serviciosPorId[s.id] = s));
+
   const cont = document.getElementById("lista-servicios");
   const pendientes = servicios.filter((s) => s.estado === "pendiente" || s.estado === "en_curso");
   const terminados = servicios.filter((s) => s.estado === "terminado" || s.estado === "cancelado");
@@ -61,6 +65,9 @@ function pintarServicios(servicios) {
   cont.querySelectorAll("[data-terminar]").forEach((btn) => {
     btn.addEventListener("click", () => terminarServicio(btn.getAttribute("data-terminar")));
   });
+  cont.querySelectorAll("[data-copy-id]").forEach((btn) => {
+    btn.addEventListener("click", () => copiarCampo(btn));
+  });
 }
 
 function renderServicioCard(s) {
@@ -77,7 +84,15 @@ function renderServicioCard(s) {
       <div class="icon-wrap">${icon(iconoTipoServicio(s.tipoServicio), 17, "#2F6FD6")}</div>
       <div class="info">
         <div class="title">${escapeHtml(s.clienteNombre)} <span style="color:var(--gray);font-weight:500">· ${escapeHtml(s.tipoServicio)}</span></div>
-        <div class="sub">${escapeHtml(s.direccion)}${s.clienteTelefono ? " · " + escapeHtml(s.clienteTelefono) : ""}</div>
+        <div class="copy-row">
+          <span class="copy-text">${escapeHtml(s.direccion)}</span>
+          <button class="copy-btn" data-copy-id="${s.id}" data-copy-field="direccion" title="Copiar dirección">${icon("copy", 12)}</button>
+        </div>
+        ${s.clienteTelefono ? `
+        <div class="copy-row">
+          <span class="copy-text">${escapeHtml(s.clienteTelefono)}</span>
+          <button class="copy-btn" data-copy-id="${s.id}" data-copy-field="clienteTelefono" title="Copiar teléfono">${icon("copy", 12)}</button>
+        </div>` : ""}
         ${s.notas ? `<div class="sub" style="font-style:italic">${escapeHtml(s.notas)}</div>` : ""}
       </div>
       <div class="amount">
@@ -87,6 +102,46 @@ function renderServicioCard(s) {
       ${acciones ? `<div class="actions" style="width:100%;justify-content:flex-end;margin-top:6px">${acciones}</div>` : ""}
     </div>
   `;
+}
+
+function copiarCampo(btn) {
+  const id = btn.getAttribute("data-copy-id");
+  const campo = btn.getAttribute("data-copy-field");
+  const servicio = serviciosPorId[id];
+  if (!servicio) return;
+  const texto = servicio[campo] || "";
+
+  const marcarCopiado = () => {
+    const original = btn.innerHTML;
+    btn.innerHTML = icon("check", 12);
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.innerHTML = icon("copy", 12);
+      btn.classList.remove("copied");
+    }, 1200);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(() => copiarConFallback(texto, marcarCopiado));
+  } else {
+    copiarConFallback(texto, marcarCopiado);
+  }
+}
+
+function copiarConFallback(texto, onOk) {
+  const temp = document.createElement("textarea");
+  temp.value = texto;
+  temp.style.position = "fixed";
+  temp.style.opacity = "0";
+  document.body.appendChild(temp);
+  temp.select();
+  try {
+    document.execCommand("copy");
+    onOk();
+  } catch (e) {
+    console.error("No se pudo copiar:", e);
+  }
+  document.body.removeChild(temp);
 }
 
 async function iniciarServicio(id) {

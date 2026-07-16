@@ -196,6 +196,17 @@ textarea.input { min-height: 70px; resize: vertical; }
   font-size: 12px; color: var(--gray);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.copy-row {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray);
+  margin-top: 2px;
+}
+.copy-row .copy-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy-btn {
+  flex-shrink: 0; border: none; background: var(--blue-light); color: var(--blue-dark);
+  width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center;
+  justify-content: center; cursor: pointer; padding: 0;
+}
+.copy-btn.copied { background: #DCF5E4; color: var(--green); }
 .service-row .amount { text-align: right; flex-shrink: 0; }
 .service-row .amount .value { font-weight: 800; color: var(--blue-dark); font-size: 14px; }
 .service-row .amount .date { font-size: 11px; color: var(--gray); }
