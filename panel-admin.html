@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HM Express — Panel de administrador</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand-mini">
+    <div class="icon-badge" id="topbar-icon"></div>
+    <div class="brand">HM <span>EXPRESS</span></div>
+  </div>
+  <div class="user-block">
+    <div>
+      <div class="user-name" id="topbar-user-name"></div>
+      <div class="user-role" id="topbar-user-role"></div>
+    </div>
+    <button class="btn-logout" id="topbar-logout"><span id="logout-icon"></span> Salir</button>
+  </div>
+</div>
+
+<div class="tabnav">
+  <button data-tab="dashboard" class="active"><span data-icon="trending-up"></span> Panel</button>
+  <button data-tab="asignar"><span data-icon="plus"></span> Asignar servicio</button>
+  <button data-tab="todos"><span data-icon="package"></span> Todos los servicios</button>
+  <button data-tab="trabajadores"><span data-icon="users"></span> Trabajadores</button>
+</div>
+
+<div class="content">
+
+  <!-- ---------- DASHBOARD ---------- -->
+  <div class="tab-panel" id="tab-dashboard">
+    <div class="grid-stats">
+      <div class="card stat-card">
+        <div class="stat-head"><div class="stat-icon" style="background:#2F6FD61A"><span data-icon="package" data-color="#2F6FD6"></span></div>Servicios hoy</div>
+        <div class="stat-value" id="stat-servicios-hoy">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-head"><div class="stat-icon" style="background:#F5B7001A"><span data-icon="dollar" data-color="#F5B700"></span></div>Ingresos hoy</div>
+        <div class="stat-value" id="stat-ingresos-hoy">$0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-head"><div class="stat-icon" style="background:#0B2A541A"><span data-icon="trending-up" data-color="#0B2A54"></span></div>Servicios totales</div>
+        <div class="stat-value" id="stat-servicios-total">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-head"><div class="stat-icon" style="background:#1E9E5A1A"><span data-icon="users" data-color="#1E9E5A"></span></div>Trabajadores</div>
+        <div class="stat-value" id="stat-trabajadores">0</div>
+      </div>
+    </div>
+
+    <div class="grid-stats" style="margin-bottom:16px">
+      <div class="stat-pill">
+        <div class="pill-head"><span data-icon="clock"></span> Pendientes hoy</div>
+        <div class="pill-value" id="stat-pendientes-hoy">0</div>
+      </div>
+      <div class="stat-pill highlight">
+        <div class="pill-head"><span data-icon="play"></span> En curso ahora</div>
+        <div class="pill-value" id="stat-en-curso-hoy">0</div>
+      </div>
+    </div>
+
+    <div class="grid-admin">
+      <div class="card">
+        <h3>Ingresos por trabajador (servicios terminados)</h3>
+        <div id="ranking-trabajadores"></div>
+      </div>
+      <div class="card">
+        <h3>Servicios por tipo</h3>
+        <div id="conteo-tipos" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+
+    <div style="text-align:right;font-size:12.5px;color:var(--gray);margin-top:4px">
+      Ingresos acumulados de todos los tiempos: <strong style="color:var(--navy)" id="ingresos-generales">$0</strong>
+    </div>
+  </div>
+
+  <!-- ---------- ASIGNAR SERVICIO ---------- -->
+  <div class="tab-panel hidden" id="tab-asignar">
+    <div class="card">
+      <h2 id="titulo-form-asignar">Asignar servicio</h2>
+      <p class="subtitle">Escoge el trabajador y los detalles del servicio que debe realizar.</p>
+
+      <form id="form-asignar">
+        <div class="field">
+          <label>Trabajador <span class="required">*</span></label>
+          <select class="input" id="select-trabajador"></select>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Cliente <span class="required">*</span></label>
+            <input class="input" id="input-cliente" placeholder="Nombre del cliente" />
+          </div>
+          <div class="field">
+            <label>Teléfono</label>
+            <input class="input" id="input-telefono" placeholder="300 000 0000" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Dirección <span class="required">*</span></label>
+          <input class="input" id="input-direccion" placeholder="Dirección de entrega" />
+        </div>
+
+        <div class="field">
+          <label>Tipo de servicio <span class="required">*</span></label>
+          <div class="service-type-grid" id="tipos-servicio-grid"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Valor del servicio (COP) <span class="required">*</span></label>
+            <input class="input" type="number" min="0" id="input-valor" placeholder="15000" />
+          </div>
+          <div class="field">
+            <label>Método de pago</label>
+            <select class="input" id="select-metodo-pago"></select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Fecha programada <span class="required">*</span></label>
+            <input class="input" type="date" id="fecha-programada" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Notas (opcional)</label>
+          <textarea class="input" id="input-notas" placeholder="Detalles adicionales del servicio"></textarea>
+        </div>
+
+        <div id="asignar-error" class="error-text"></div>
+        <div id="asignar-success" class="success-text"></div>
+
+        <button type="submit" class="btn btn-primary" id="btn-guardar-servicio"><span data-icon="plus"></span> Asignar servicio</button>
+        <button type="button" class="btn btn-outline hidden" id="btn-cancelar-edicion" style="margin-left:8px">Cancelar edición</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ---------- TODOS LOS SERVICIOS ---------- -->
+  <div class="tab-panel hidden" id="tab-todos">
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:14px">
+        <h2 style="margin:0">Todos los servicios</h2>
+        <button class="btn btn-outline" id="btn-exportar-csv"><span data-icon="download"></span> Exportar CSV</button>
+      </div>
+
+      <div class="filters-row">
+        <div class="search-wrap">
+          <span data-icon="search"></span>
+          <input class="input" id="filtro-buscar" placeholder="Cliente o dirección" />
+        </div>
+        <select class="input" id="filtro-trabajador"></select>
+        <select class="input" id="filtro-tipo"></select>
+        <select class="input" id="filtro-estado">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en_curso">En curso</option>
+          <option value="terminado">Terminado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <input class="input" type="date" id="filtro-desde" />
+        <input class="input" type="date" id="filtro-hasta" />
+      </div>
+
+      <div class="flex-between" style="margin-bottom:10px;padding:0 4px">
+        <span style="font-size:12.5px;color:var(--gray);font-weight:600" id="contador-servicios">0 servicio(s)</span>
+        <span style="font-size:13.5px;font-weight:800;color:var(--blue-dark)" id="total-filtrado">$0</span>
+      </div>
+
+      <div id="lista-todos-servicios"></div>
+    </div>
+  </div>
+
+  <!-- ---------- TRABAJADORES ---------- -->
+  <div class="tab-panel hidden" id="tab-trabajadores">
+    <div class="grid-admin">
+      <div class="card">
+        <h2>Nuevo trabajador</h2>
+        <form id="form-trabajador">
+          <div class="field">
+            <label>Nombre completo <span class="required">*</span></label>
+            <input class="input" id="input-nombre-trabajador" placeholder="Ej: Carlos Pérez" />
+          </div>
+          <div class="field">
+            <label>Usuario <span class="required">*</span></label>
+            <input class="input" id="input-username-trabajador" placeholder="carlos.perez" />
+          </div>
+          <div class="field">
+            <label>Contraseña <span class="required">*</span></label>
+            <input class="input" id="input-password-trabajador" placeholder="Mínimo 6 caracteres" />
+          </div>
+          <div id="trabajador-error" class="error-text"></div>
+          <div id="trabajador-success" class="success-text"></div>
+          <button type="submit" class="btn btn-primary" id="btn-crear-trabajador"><span data-icon="user-plus"></span> Crear acceso</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 id="titulo-equipo">Equipo (0)</h2>
+        <div id="lista-trabajadores"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/notificaciones.js"></script>
+<script src="js/admin-dashboard.js"></script>
+<script src="js/admin-asignar.js"></script>
+<script src="js/admin-servicios.js"></script>
+<script src="js/admin-trabajadores.js"></script>
+<script src="js/admin-app.js"></script>
+<script>
+  // Pinta todos los iconos declarados con data-icon en el HTML
+  document.querySelectorAll("[data-icon]").forEach((el) => {
+    el.innerHTML = icon(el.getAttribute("data-icon"), 16, el.getAttribute("data-color") || "currentColor");
+  });
+  document.getElementById("topbar-icon").innerHTML = icon("bike", 18, "#fff");
+  document.getElementById("logout-icon").outerHTML = icon("logout", 15);
+  document.getElementById("select-metodo-pago").innerHTML = METODOS_PAGO.map((m) => `<option value="${m}">${m}</option>`).join("");
+</script>
+</body>
+</html>
