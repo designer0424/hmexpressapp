@@ -15,7 +15,7 @@
 */
 
 const EMAILJS_SERVICE_ID = "service_f97vf7e";
-const EMAILJS_TEMPLATE_ID = "template_cuz8g39";
+const EMAILJS_TEMPLATE_ID = "template_7uhqrls";
 const EMAILJS_PUBLIC_KEY = "092KHcfz35-QNZgR0";
 const CORREO_PROPIETARIO = "corresoeluis@gmail.com";
 
