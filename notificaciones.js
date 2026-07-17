@@ -17,7 +17,7 @@
 const EMAILJS_SERVICE_ID = "service_f97vf7e";
 const EMAILJS_TEMPLATE_ID = "template_7uhqrls";
 const EMAILJS_PUBLIC_KEY = "092KHcfz35-QNZgR0";
-const CORREO_PROPIETARIO = "corresoeluis@gmail.com";
+const CORREO_PROPIETARIO = "Expressghm@gmail.com";
 
 if (window.emailjs) {
   emailjs.init(EMAILJS_PUBLIC_KEY);
