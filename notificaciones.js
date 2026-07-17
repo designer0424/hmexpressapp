@@ -14,10 +14,10 @@
   5. Cambia CORREO_PROPIETARIO por tu correo real.
 */
 
-const EMAILJS_SERVICE_ID = "TU_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID = "TU_TEMPLATE_ID";
-const EMAILJS_PUBLIC_KEY = "TU_PUBLIC_KEY";
-const CORREO_PROPIETARIO = "tu-correo@ejemplo.com";
+const EMAILJS_SERVICE_ID = "service_f97vf7e";
+const EMAILJS_TEMPLATE_ID = "template_cuz8g39";
+const EMAILJS_PUBLIC_KEY = "092KHcfz35-QNZgR0";
+const CORREO_PROPIETARIO = "corresoeluis@gmail.com";
 
 if (window.emailjs) {
   emailjs.init(EMAILJS_PUBLIC_KEY);
