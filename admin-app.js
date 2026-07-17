@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initDashboard();
     initAsignar();
     initServicios();
+    initHistorial();
     initTrabajadores();
     initTabs();
   });

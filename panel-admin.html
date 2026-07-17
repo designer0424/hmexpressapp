@@ -26,6 +26,7 @@
   <button data-tab="dashboard" class="active"><span data-icon="trending-up"></span> Panel</button>
   <button data-tab="asignar"><span data-icon="plus"></span> Asignar servicio</button>
   <button data-tab="todos"><span data-icon="package"></span> Todos los servicios</button>
+  <button data-tab="historial"><span data-icon="calendar"></span> Historial</button>
   <button data-tab="trabajadores"><span data-icon="users"></span> Trabajadores</button>
 </div>
 
@@ -102,9 +103,20 @@
           </div>
         </div>
 
-        <div class="field">
+        <div class="field" id="campo-direccion-unica">
           <label>Dirección <span class="required">*</span></label>
           <input class="input" id="input-direccion" placeholder="Dirección de entrega" />
+        </div>
+
+        <div class="grid-2 hidden" id="campo-direcciones-domicilio">
+          <div class="field">
+            <label>Dirección de recogida <span class="required">*</span></label>
+            <input class="input" id="input-direccion-recogida" placeholder="¿De dónde se recoge?" />
+          </div>
+          <div class="field">
+            <label>Dirección de entrega <span class="required">*</span></label>
+            <input class="input" id="input-direccion-entrega" placeholder="¿A dónde se entrega?" />
+          </div>
         </div>
 
         <div class="field">
@@ -179,6 +191,23 @@
     </div>
   </div>
 
+  <!-- ---------- HISTORIAL ---------- -->
+  <div class="tab-panel hidden" id="tab-historial">
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:14px">
+        <h2 style="margin:0">Historial por día</h2>
+        <input class="input" type="date" id="historial-fecha" style="max-width:170px" />
+      </div>
+      <div class="grid-admin">
+        <div>
+          <h3>Días con actividad</h3>
+          <div id="lista-dias-historial" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div id="detalle-historial"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ---------- TRABAJADORES ---------- -->
   <div class="tab-panel hidden" id="tab-trabajadores">
     <div class="grid-admin">
@@ -210,32 +239,3 @@
     </div>
   </div>
 
-</div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
-<!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
-<script src="firebase-config.js"></script>
-<script src="utils.js"></script>
-<script src="auth.js"></script>
-<script src="notificaciones.js"></script>
-<script src="admin-dashboard.js"></script>
-<script src="admin-asignar.js"></script>
-<script src="admin-servicios.js"></script>
-<script src="admin-trabajadores.js"></script>
-<script src="admin-app.js"></script>
-<script>
-  // Pinta todos los iconos declarados con data-icon en el HTML
-  document.querySelectorAll("[data-icon]").forEach((el) => {
-    el.innerHTML = icon(el.getAttribute("data-icon"), 16, el.getAttribute("data-color") || "currentColor");
-  });
-  document.getElementById("topbar-icon").innerHTML = icon("bike", 18, "#fff");
-  document.getElementById("logout-icon").outerHTML = icon("logout", 15);
-  document.getElementById("select-metodo-pago").innerHTML = METODOS_PAGO.map((m) => `<option value="${m}">${m}</option>`).join("");
-</script>
-</body>
-</html>

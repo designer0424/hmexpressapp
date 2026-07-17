@@ -46,6 +46,13 @@
   </div>
 </div>
 
+<div class="modal-overlay hidden" id="modal-detalle">
+  <div class="modal-card">
+    <button class="modal-close" id="modal-cerrar"><span id="modal-close-icon"></span></button>
+    <div id="modal-contenido"></div>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
@@ -64,6 +71,11 @@
   });
   document.getElementById("topbar-icon").innerHTML = icon("bike", 18, "#fff");
   document.getElementById("logout-icon").outerHTML = icon("logout", 15);
+  document.getElementById("modal-close-icon").outerHTML = icon("x", 16);
+  document.getElementById("modal-cerrar").addEventListener("click", cerrarDetalle);
+  document.getElementById("modal-detalle").addEventListener("click", (e) => {
+    if (e.target.id === "modal-detalle") cerrarDetalle();
+  });
 </script>
 </body>
 </html>

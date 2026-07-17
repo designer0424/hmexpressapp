@@ -75,6 +75,14 @@ function hoyISO() {
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
 }
 
+function fmtFechaLegible(fechaISO) {
+  // fechaISO: "YYYY-MM-DD"
+  const [y, m, d] = fechaISO.split("-").map(Number);
+  const fecha = new Date(y, m - 1, d);
+  const texto = fecha.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str == null ? "" : str;

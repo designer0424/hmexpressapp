@@ -37,8 +37,15 @@ function pintarTiposServicio() {
       tipoSeleccionado = btn.getAttribute("data-tipo");
       cont.querySelectorAll(".service-type-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      actualizarCamposDireccion();
     });
   });
+}
+
+function actualizarCamposDireccion() {
+  const esDomicilio = tipoSeleccionado === "Domicilios";
+  document.getElementById("campo-direccion-unica").classList.toggle("hidden", esDomicilio);
+  document.getElementById("campo-direcciones-domicilio").classList.toggle("hidden", !esDomicilio);
 }
 
 async function guardarServicio(e) {
@@ -53,14 +60,26 @@ async function guardarServicio(e) {
   const trabajadorNombre = selectTrabajador.selectedOptions[0]?.getAttribute("data-nombre") || "";
   const cliente = document.getElementById("input-cliente").value.trim();
   const telefono = document.getElementById("input-telefono").value.trim();
-  const direccion = document.getElementById("input-direccion").value.trim();
   const valor = Number(document.getElementById("input-valor").value);
   const metodoPago = document.getElementById("select-metodo-pago").value;
   const notas = document.getElementById("input-notas").value.trim();
   const fechaProgramada = document.getElementById("fecha-programada").value;
 
-  if (!trabajadorUid || !cliente || !direccion || !tipoSeleccionado || !valor || !fechaProgramada) {
-    errorEl.textContent = "Completa trabajador, cliente, dirección, tipo de servicio, valor y fecha.";
+  const esDomicilio = tipoSeleccionado === "Domicilios";
+  const direccion = document.getElementById("input-direccion").value.trim();
+  const direccionRecogida = document.getElementById("input-direccion-recogida").value.trim();
+  const direccionEntrega = document.getElementById("input-direccion-entrega").value.trim();
+
+  if (!trabajadorUid || !cliente || !tipoSeleccionado || !valor || !fechaProgramada) {
+    errorEl.textContent = "Completa trabajador, cliente, tipo de servicio, valor y fecha.";
+    return;
+  }
+  if (esDomicilio && (!direccionRecogida || !direccionEntrega)) {
+    errorEl.textContent = "Completa la dirección de recogida y la de entrega.";
+    return;
+  }
+  if (!esDomicilio && !direccion) {
+    errorEl.textContent = "Completa la dirección.";
     return;
   }
   if (valor <= 0) {
@@ -73,7 +92,6 @@ async function guardarServicio(e) {
     trabajadorNombre,
     clienteNombre: cliente,
     clienteTelefono: telefono,
-    direccion,
     tipoServicio: tipoSeleccionado,
     valor,
     metodoPago,
@@ -81,9 +99,22 @@ async function guardarServicio(e) {
     fechaProgramada,
   };
 
+  if (esDomicilio) {
+    datos.direccionRecogida = direccionRecogida;
+    datos.direccionEntrega = direccionEntrega;
+    datos.direccion = direccionEntrega; // se usa como dirección "general" para búsquedas y listados
+  } else {
+    datos.direccion = direccion;
+  }
+
   try {
     if (editandoId) {
-      await db.collection("servicios").doc(editandoId).update(datos);
+      const datosUpdate = { ...datos };
+      if (!esDomicilio) {
+        datosUpdate.direccionRecogida = firebase.firestore.FieldValue.delete();
+        datosUpdate.direccionEntrega = firebase.firestore.FieldValue.delete();
+      }
+      await db.collection("servicios").doc(editandoId).update(datosUpdate);
       successEl.textContent = "✓ Servicio actualizado correctamente";
     } else {
       const perfil = await obtenerPerfil(auth.currentUser.uid);
@@ -111,6 +142,7 @@ function resetFormAsignar() {
   document.getElementById("fecha-programada").value = hoyISO();
   tipoSeleccionado = "";
   document.querySelectorAll(".service-type-btn").forEach((b) => b.classList.remove("active"));
+  actualizarCamposDireccion();
   editandoId = null;
   document.getElementById("titulo-form-asignar").textContent = "Asignar servicio";
   document.getElementById("btn-guardar-servicio").innerHTML = icon("plus", 16) + " Asignar servicio";
@@ -123,7 +155,9 @@ function cargarServicioParaEditar(servicio) {
   document.getElementById("select-trabajador").value = servicio.trabajadorUid;
   document.getElementById("input-cliente").value = servicio.clienteNombre;
   document.getElementById("input-telefono").value = servicio.clienteTelefono || "";
-  document.getElementById("input-direccion").value = servicio.direccion;
+  document.getElementById("input-direccion").value = servicio.tipoServicio === "Domicilios" ? "" : (servicio.direccion || "");
+  document.getElementById("input-direccion-recogida").value = servicio.direccionRecogida || "";
+  document.getElementById("input-direccion-entrega").value = servicio.direccionEntrega || "";
   document.getElementById("input-valor").value = servicio.valor;
   document.getElementById("select-metodo-pago").value = servicio.metodoPago;
   document.getElementById("input-notas").value = servicio.notas || "";
@@ -133,6 +167,7 @@ function cargarServicioParaEditar(servicio) {
   document.querySelectorAll(".service-type-btn").forEach((b) => {
     b.classList.toggle("active", b.getAttribute("data-tipo") === servicio.tipoServicio);
   });
+  actualizarCamposDireccion();
 
   document.getElementById("titulo-form-asignar").textContent = "Editar servicio";
   document.getElementById("btn-guardar-servicio").innerHTML = icon("check", 16) + " Guardar cambios";

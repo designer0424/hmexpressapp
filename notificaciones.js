@@ -5,10 +5,10 @@
   https://www.emailjs.com — plan gratuito).
 
   1. En EmailJS crea un "Email Service" y copia su ID en EMAILJS_SERVICE_ID.
-  2. Crea un "Email Template" con estas variables (usarlas tal cual entre {{ }}):
-       {{trabajador}}  {{cliente}}  {{tipo_servicio}}  {{evento}}  {{hora}}  {{to_email}}
-     Ejemplo de cuerpo del correo:
-       "{{trabajador}} {{evento}} el servicio de {{cliente}} ({{tipo_servicio}}) a las {{hora}}."
+  2. Crea un "Email Template". Te dejé un boceto completo y ya diseñado en
+     el archivo email-template.html — solo pégalo en el editor de EmailJS.
+     Variables disponibles: {{trabajador}} {{cliente}} {{tipo_servicio}}
+     {{direccion}} {{valor}} {{evento}} {{evento_titulo}} {{hora}} {{to_email}}
   3. Copia el Template ID en EMAILJS_TEMPLATE_ID.
   4. En Account > General copia tu Public Key en EMAILJS_PUBLIC_KEY.
   5. Cambia CORREO_PROPIETARIO por tu correo real.
@@ -27,12 +27,20 @@ function notificarPropietario(servicio, evento) {
   // evento: "inicio" | "fin"
   if (!window.emailjs) return;
 
+  const esDomicilioConDosDirecciones = servicio.tipoServicio === "Domicilios" && servicio.direccionRecogida && servicio.direccionEntrega;
+  const direccionTexto = esDomicilioConDosDirecciones
+    ? `Recogida: ${servicio.direccionRecogida} · Entrega: ${servicio.direccionEntrega}`
+    : servicio.direccion || "";
+
   const params = {
     to_email: CORREO_PROPIETARIO,
     trabajador: servicio.trabajadorNombre,
     cliente: servicio.clienteNombre,
     tipo_servicio: servicio.tipoServicio,
+    direccion: direccionTexto,
+    valor: fmtMoney(servicio.valor),
     evento: evento === "inicio" ? "inició" : "terminó",
+    evento_titulo: evento === "inicio" ? "Servicio iniciado" : "Servicio terminado",
     hora: new Date().toLocaleString("es-CO"),
   };
 

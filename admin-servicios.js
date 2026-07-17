@@ -15,6 +15,7 @@ function initServicios() {
       snap.forEach((doc) => todosLosServicios.push({ id: doc.id, ...doc.data() }));
       todosLosServicios.sort((a, b) => (b.fechaAsignacion?.seconds || 0) - (a.fechaAsignacion?.seconds || 0));
       aplicarFiltros();
+      if (typeof pintarHistorial === "function") pintarHistorial();
     },
     (err) => console.error(err)
   );
@@ -92,12 +93,16 @@ function pintarTablaServicios(servicios) {
 function renderFilaServicio(s) {
   const est = ESTADOS[s.estado] || ESTADOS.pendiente;
   const enConfirmacion = confirmandoEliminar === s.id;
+  const esDomicilioConDosDirecciones = s.tipoServicio === "Domicilios" && s.direccionRecogida && s.direccionEntrega;
+  const subDireccion = esDomicilioConDosDirecciones
+    ? `${escapeHtml(s.direccionRecogida)} → ${escapeHtml(s.direccionEntrega)}`
+    : escapeHtml(s.direccion);
   return `
     <div class="service-row">
       <div class="icon-wrap">${icon(iconoTipoServicio(s.tipoServicio), 17, "#2F6FD6")}</div>
       <div class="info">
         <div class="title">${escapeHtml(s.clienteNombre)} <span style="color:var(--gray);font-weight:500">· ${escapeHtml(s.tipoServicio)}</span></div>
-        <div class="sub">${escapeHtml(s.direccion)} · ${escapeHtml(s.trabajadorNombre)}</div>
+        <div class="sub">${subDireccion} · ${escapeHtml(s.trabajadorNombre)}</div>
       </div>
       <div class="amount">
         <div class="value">${fmtMoney(s.valor)}</div>
@@ -152,9 +157,10 @@ function exportarCSV() {
     return true;
   });
 
-  const header = ["Fecha programada", "Trabajador", "Cliente", "Telefono", "Direccion", "Tipo", "Valor", "Metodo de pago", "Estado", "Notas"];
+  const header = ["Fecha programada", "Trabajador", "Cliente", "Telefono", "Direccion", "Direccion recogida", "Direccion entrega", "Tipo", "Valor", "Metodo de pago", "Estado", "Notas"];
   const rows = filtrados.map((s) => [
     s.fechaProgramada, s.trabajadorNombre, s.clienteNombre, s.clienteTelefono, s.direccion,
+    s.direccionRecogida || "", s.direccionEntrega || "",
     s.tipoServicio, s.valor, s.metodoPago, ESTADOS[s.estado]?.label || s.estado, (s.notas || "").replace(/\n/g, " "),
   ]);
   const csv = [header, ...rows].map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
