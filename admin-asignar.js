@@ -97,6 +97,7 @@ async function guardarServicio(e) {
     metodoPago,
     notas,
     fechaProgramada,
+    fechaLimite: sumarDias(fechaProgramada, 7),
   };
 
   if (esDomicilio) {

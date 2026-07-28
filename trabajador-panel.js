@@ -10,16 +10,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function escucharServiciosDeHoy() {
-  const hoy = hoyISO();
   unsubscribeServicios = db
     .collection("servicios")
     .where("trabajadorUid", "==", perfilActual.uid)
-    .where("fechaProgramada", "==", hoy)
+    .where("estado", "in", ["pendiente", "en_curso"])
     .onSnapshot(
       (snap) => {
         const servicios = [];
         snap.forEach((doc) => servicios.push({ id: doc.id, ...doc.data() }));
-        servicios.sort((a, b) => (a.fechaAsignacion?.seconds || 0) - (b.fechaAsignacion?.seconds || 0));
+        // Los vencidos y en curso primero; entre pendientes, el que vence más pronto va primero
+        servicios.sort((a, b) => {
+          if (a.estado !== b.estado) return a.estado === "en_curso" ? -1 : 1;
+          return (a.fechaLimite || "").localeCompare(b.fechaLimite || "");
+        });
         pintarServicios(servicios);
       },
       (err) => {
@@ -35,28 +38,19 @@ function pintarServicios(servicios) {
   servicios.forEach((s) => (serviciosPorId[s.id] = s));
 
   const cont = document.getElementById("lista-servicios");
-  const pendientes = servicios.filter((s) => s.estado === "pendiente" || s.estado === "en_curso");
-  const terminados = servicios.filter((s) => s.estado === "terminado" || s.estado === "cancelado");
+  const enCurso = servicios.filter((s) => s.estado === "en_curso").length;
+  const vencidos = servicios.filter((s) => s.fechaLimite && diasRestantes(s.fechaLimite) < 0).length;
 
   document.getElementById("stat-total").textContent = servicios.length;
-  document.getElementById("stat-pendientes").textContent = pendientes.length;
-  document.getElementById("stat-terminados").textContent = terminados.filter((s) => s.estado === "terminado").length;
+  document.getElementById("stat-pendientes").textContent = enCurso;
+  document.getElementById("stat-terminados").textContent = vencidos;
 
   if (servicios.length === 0) {
-    cont.innerHTML = `<div class="empty-state">${icon("package", 30)}<div>Todavía no tienes servicios asignados para hoy.</div></div>`;
+    cont.innerHTML = `<div class="empty-state">${icon("package", 30)}<div>No tienes servicios pendientes por hacer 🎉</div></div>`;
     return;
   }
 
-  let html = "";
-  if (pendientes.length > 0) {
-    html += `<h3 style="margin:18px 0 10px">Por hacer</h3>`;
-    pendientes.forEach((s) => (html += renderServicioCard(s)));
-  }
-  if (terminados.length > 0) {
-    html += `<h3 style="margin:22px 0 10px">Completados hoy</h3>`;
-    terminados.forEach((s) => (html += renderServicioCard(s)));
-  }
-  cont.innerHTML = html;
+  cont.innerHTML = servicios.map((s) => renderServicioCard(s)).join("");
 
   // enlazar botones
   cont.querySelectorAll("[data-iniciar]").forEach((btn) => {
@@ -115,10 +109,19 @@ function renderServicioCard(s) {
       <div class="amount">
         <div class="value">${fmtMoney(s.valor)}</div>
         <span class="badge ${est.class}">${est.label}</span>
+        ${s.fechaLimite ? `<div style="margin-top:4px">${renderBadgePlazo(s.fechaLimite)}</div>` : ""}
       </div>
       ${acciones ? `<div class="actions" style="width:100%;justify-content:flex-end;margin-top:6px">${acciones}</div>` : ""}
     </div>
   `;
+}
+
+function renderBadgePlazo(fechaLimite) {
+  const dias = diasRestantes(fechaLimite);
+  if (dias < 0) return `<span class="badge badge-cancelado">Vencido</span>`;
+  if (dias === 0) return `<span class="badge badge-pendiente">Vence hoy</span>`;
+  if (dias === 1) return `<span class="badge badge-pendiente">Vence mañana</span>`;
+  return `<span class="badge badge-en_curso">${dias} días restantes</span>`;
 }
 
 function abrirDetalle(id) {
@@ -158,6 +161,7 @@ function abrirDetalle(id) {
 
   html += `<div class="detalle-row"><div class="detalle-label">Valor del servicio</div><div class="detalle-value">${fmtMoney(s.valor)}</div></div>`;
   html += `<div class="detalle-row"><div class="detalle-label">Método de pago</div><div class="detalle-value">${escapeHtml(s.metodoPago)}</div></div>`;
+  if (s.fechaLimite) html += `<div class="detalle-row"><div class="detalle-label">Plazo</div><div class="detalle-value">${renderBadgePlazo(s.fechaLimite)}</div></div>`;
   if (s.notas) html += `<div class="detalle-row"><div class="detalle-label">Notas</div><div class="detalle-value" style="font-weight:500">${escapeHtml(s.notas)}</div></div>`;
 
   document.getElementById("modal-contenido").innerHTML = html;

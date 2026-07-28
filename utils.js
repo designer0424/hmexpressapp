@@ -83,6 +83,23 @@ function fmtFechaLegible(fechaISO) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+function sumarDias(fechaISO, dias) {
+  const [y, m, d] = fechaISO.split("-").map(Number);
+  const fecha = new Date(y, m - 1, d);
+  fecha.setDate(fecha.getDate() + dias);
+  const mm = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dd = String(fecha.getDate()).padStart(2, "0");
+  return `${fecha.getFullYear()}-${mm}-${dd}`;
+}
+
+function diasRestantes(fechaLimiteISO) {
+  const [y, m, d] = fechaLimiteISO.split("-").map(Number);
+  const limite = new Date(y, m - 1, d);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return Math.round((limite - hoy) / 86400000);
+}
+
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str == null ? "" : str;
