@@ -98,21 +98,21 @@ function renderFilaServicio(s) {
     ? `${escapeHtml(s.direccionRecogida)} → ${escapeHtml(s.direccionEntrega)}`
     : escapeHtml(s.direccion);
 
-  let lineaTiempos = "";
-  if (s.horaInicio || s.horaFin) {
-    const partes = [];
-    if (s.horaInicio) partes.push(`Inició: ${fmtDateTime(s.horaInicio)}`);
-    if (s.horaFin) partes.push(`Terminó: ${fmtDateTime(s.horaFin)}`);
-    lineaTiempos = `<div class="sub" style="color:var(--blue-dark);font-weight:600">${partes.join(" · ")}</div>`;
-  }
+  const subido = s.fechaAsignacion ? fmtDateTime(s.fechaAsignacion) : "—";
+  const inicio = s.horaInicio ? fmtDateTime(s.horaInicio) : "—";
+  const fin = s.horaFin ? fmtDateTime(s.horaFin) : "—";
 
   return `
-    <div class="service-row">
+    <div class="service-row" style="flex-wrap:wrap">
       <div class="icon-wrap">${icon(iconoTipoServicio(s.tipoServicio), 17, "#2F6FD6")}</div>
       <div class="info">
         <div class="title">${escapeHtml(s.clienteNombre)} <span style="color:var(--gray);font-weight:500">· ${escapeHtml(s.tipoServicio)}</span></div>
         <div class="sub">${subDireccion} · ${escapeHtml(s.trabajadorNombre)}</div>
-        ${lineaTiempos}
+        <div class="tiempos-grid">
+          <div><span class="tiempos-label">Subido</span>${subido}</div>
+          <div><span class="tiempos-label">Inició</span>${inicio}</div>
+          <div><span class="tiempos-label">Terminó</span>${fin}</div>
+        </div>
       </div>
       <div class="amount">
         <div class="value">${fmtMoney(s.valor)}</div>
@@ -167,11 +167,12 @@ function exportarCSV() {
     return true;
   });
 
-  const header = ["Fecha programada", "Trabajador", "Cliente", "Telefono", "Direccion", "Direccion recogida", "Direccion entrega", "Tipo", "Valor", "Metodo de pago", "Estado", "Hora inicio", "Hora fin", "Notas"];
+  const header = ["Fecha programada", "Trabajador", "Cliente", "Telefono", "Direccion", "Direccion recogida", "Direccion entrega", "Tipo", "Valor", "Metodo de pago", "Estado", "Subido", "Hora inicio", "Hora fin", "Notas"];
   const rows = filtrados.map((s) => [
     s.fechaProgramada, s.trabajadorNombre, s.clienteNombre, s.clienteTelefono, s.direccion,
     s.direccionRecogida || "", s.direccionEntrega || "",
     s.tipoServicio, s.valor, s.metodoPago, ESTADOS[s.estado]?.label || s.estado,
+    s.fechaAsignacion ? fmtDateTime(s.fechaAsignacion) : "",
     s.horaInicio ? fmtDateTime(s.horaInicio) : "", s.horaFin ? fmtDateTime(s.horaFin) : "",
     (s.notas || "").replace(/\n/g, " "),
   ]);

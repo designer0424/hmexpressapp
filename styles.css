@@ -230,6 +230,19 @@ textarea.input { min-height: 70px; resize: vertical; }
   margin-top: 2px;
 }
 .copy-row .copy-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tiempos-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px;
+  margin-top: 8px; padding: 8px 10px; background: var(--gray-light); border-radius: 9px;
+  font-size: 11.5px; color: var(--navy); font-weight: 600;
+}
+.tiempos-grid .tiempos-label {
+  display: block; font-size: 10px; color: var(--gray); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px;
+}
+@media (max-width: 560px) {
+  .tiempos-grid { grid-template-columns: 1fr; }
+}
 .copy-btn {
   flex-shrink: 0; border: none; background: var(--blue-light); color: var(--blue-dark);
   width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center;
